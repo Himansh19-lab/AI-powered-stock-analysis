@@ -41,11 +41,12 @@ class DocumentLoader(ComponentInterface):
         try:
             loader_cls = SupportedFormat[extension].value[1]
             loader = loader_cls(str(file_path))
-            self.logger.info(f"Loading document with format {loader_cls}")
+            self.logger.info(f"Loading file: {file_path}")
+            self.logger.info(f"File name: {file_path.name}")
             documents = loader.load()
             for document in documents:
                 document.metadata["source"] = file_path.name
-            self.logger.info(f"Length of Documents loaded successfully: {len(documents)} from {file_path}" )
+            self.logger.info(f"Length of Documents: {len(documents)}" )
             return documents
 
         except KeyError as e:
@@ -68,13 +69,12 @@ class DocumentLoader(ComponentInterface):
                 try:
                     documents = self.load_from_file(file)
                     all_documents.extend(documents)
-                    self.logger.info(f"All documents loaded from directory. Total: {len(all_documents)}")
-
                 except Exception:
                     self.logger.error(f"Failed to load {file}")
                     raise
             else:
                 self.logger.error(f"File not supported: {file}")
+        self.logger.info(f"All documents loaded from directory. Total: {len(all_documents)}")
         return all_documents
 
 
