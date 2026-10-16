@@ -1,3 +1,4 @@
+from anyio import gettempdir
 from typing import List, Tuple
 from aiohttp.web import static
 from os import stat
@@ -14,17 +15,23 @@ from backend.utils.logger import Logger
 
 
 class VectorStore(ComponentInterface):
-    logger = Logger(name="Vector Store", log_file="vector_store.log", level="INFO")
+    logger = Logger(name="VectorStore", log_file="vector_store.log", level="INFO")
 
     def __init__(self, vector_store_path: Path = None, embeddings=None, collection_name: str = "stock_embeddings") -> None:
         self.vector_store_path = vector_store_path
         self.embeddings = embeddings
         self.collection_name = collection_name
-        self.vector_store = Chroma(
+        self._vector_store = Chroma(
             persist_directory=self.vector_store_path, 
             embedding_function=self.embeddings, 
             collection_name=self.collection_name)
     
+    @property
+    def store(self) -> Chroma:
+        """
+        Getter for underlying Chroma database instance.
+        """
+        return self._vector_store
   
     def _deduplicate_documents(self, docs: list[Document]) -> Tuple[List[str], List[Document]]:
         """
@@ -55,12 +62,12 @@ class VectorStore(ComponentInterface):
     def add_documents_to_vector_store(self, docs: list[Document]) -> Chroma:
         if not docs:
             self.logger.warning("No documents provided to add to vector store.") 
-            return self.vector_store
+            return self._vector_store
 
         unique_ids, unique_docs = self._deduplicate_documents(docs)
-        self.vector_store.add_documents(unique_docs, ids= unique_ids)
+        self._vector_store.add_documents(unique_docs, ids= unique_ids)
         self.logger.info("Documents added successfully")
-        return self.vector_store
+        return self._vector_store
     
     @staticmethod
     def _get_ids(chunk: Document):

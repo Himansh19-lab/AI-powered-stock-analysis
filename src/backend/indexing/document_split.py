@@ -10,7 +10,7 @@ from typing import List
 
 
 class ChunkDocument(ComponentInterface):
-    logger = Logger(name="Chunk Document", log_file="document_split.log", level="INFO")
+    logger = Logger(name="ChunkDocument", log_file="document_split.log", level="INFO")
 
     def __init__(self, chunk_size: int = 1000, chunk_overlap: int = 200):
         self.chunk_size = chunk_size

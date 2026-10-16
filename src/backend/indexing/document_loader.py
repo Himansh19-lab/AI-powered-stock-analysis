@@ -14,7 +14,7 @@ class SupportedFormat(Enum):
 
 class DocumentLoader(ComponentInterface):
     
-    logger = Logger(name="Document Loader", log_file="document_loader.log", level="INFO")
+    logger = Logger(name="DocumentLoader", log_file="document_loader.log", level="INFO")
 
     document_supported = [ "*"+ext.value[0] for ext in SupportedFormat]
     
