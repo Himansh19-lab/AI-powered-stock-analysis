@@ -36,6 +36,10 @@ class LLMFactory:
                     f"API key for '{model_provider}' not found. "
                     f"Please set '{env_var_name}' in your .env file or environment."
                 )
+        else:
+            raise ValueError(
+                f"Model provider '{model_provider}' not supported."
+            )
 
     @classmethod
     def get_llm(cls,model_name: str ="gpt-4o-mini",model_provider: str ="openai",
@@ -56,8 +60,8 @@ class LLMFactory:
         cls.logger.info(f"Initializing LLM: model='{model_name}', provider='{model_provider}', temp={temperature}")
         try:
             llm = init_chat_model(
-                model_name=model_name,
-                provider=model_provider,
+                model=model_name,
+                model_provider=model_provider,
                 temperature=temperature,
                 max_tokens=max_tokens,
         )
@@ -70,6 +74,8 @@ class LLMFactory:
 
 if __name__ == "__main__":
     llm = LLMFactory.get_llm()
+
     print(llm)
+
     
    
