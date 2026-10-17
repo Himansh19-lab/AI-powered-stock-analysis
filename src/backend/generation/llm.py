@@ -10,7 +10,7 @@ from backend.utils.logger import Logger
 load_dotenv()
 
 class LLMFactory:
-    logger = Logger(name="LLMFactory",log_file='llm_generation.py',level='DEBUG')
+    logger = Logger(name="LLMFactory",log_file='llm_generation.log',level='DEBUG')
 
     PROVIDER_KEY_MAP = {
         "openai": "OPENAI_API_KEY",
