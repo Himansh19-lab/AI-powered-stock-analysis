@@ -9,3 +9,9 @@ langchain-text-splitters
 
 pypdf
 dotenv
+
+
+langchain-chroma
+chromadb
+
+langchain-google-genai
