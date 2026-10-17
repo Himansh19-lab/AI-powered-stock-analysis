@@ -40,14 +40,26 @@ financial_report_prompt = ChatPromptTemplate.from_messages([
 # ==============================================================================
 # MODE 2: INTERACTIVE LIVE CONVERSATIONAL CHATBOT
 # ==============================================================================
-CHATBOT_SYSTEM_PROMPT = """You are an interactive AI Financial Research Assistant for {company_name}.
+CONTEXTUALIZE_Q_SYSTEM_PROMPT = """Given a chat history and the latest user question \
+which might reference context in the chat history, formulate a standalone question \
+which can be understood without the chat history. Do NOT answer the question, \
+just reformulate it if needed and otherwise return it as is."""
+contextualize_q_prompt = ChatPromptTemplate.from_messages([
+    ("system", CONTEXTUALIZE_Q_SYSTEM_PROMPT),
+    MessagesPlaceholder(variable_name="chat_history"),
+    ("human", "{question}"),
+])
+
+
+CHATBOT_SYSTEM_PROMPT  = """You are an interactive AI Financial Research Assistant for {company_name}.
 You help users explore and understand the company's financial results and annual reports.
 ### INSTRUCTIONS:
-1. Answer the user's question accurately using ONLY the provided document context.
-2. If the user asks a follow-up question, use the conversation history to understand context.
-3. Keep answers concise, factual, and backed by figures.
-4. Always include page citations where possible: `[Source: {company_name}, Page X]`.
-5. If the context does not contain enough data to answer, politely say:
+1. Answer the user's question accurately using the provided document context and conversation history.
+2. In corporate filings (10-K), terms like "Net Sales", "Total Revenue", and "Top-line Sales" are synonymous. Treat them as interchangeable.
+3. If the user asks a follow-up question, use the conversation history to understand context.
+4. Keep answers concise, factual, and backed by figures.
+5. Always include page citations where possible: `[Source: {company_name}, Page X]`.
+6. If neither the context nor the history contains enough data to answer, politely say:
    "I could not find that information in the provided reports for {company_name}."
 ---
 ### CONTEXT:
