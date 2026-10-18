@@ -8,11 +8,13 @@ authors = [
 ]
 requires-python = ">=3.12"
 dependencies = [
+    "boto3>=1.43.114",
     "chroma>=0.2.0",
     "chromadb>=1.5.9",
     "dotenv>=0.9.9",
     "fastapi>=0.143.2",
     "langchain>=1.4.6",
+    "langchain-aws>=1.9.0",
     "langchain-chroma>=1.1.0",
     "langchain-community>=0.4.2",
     "langchain-core>=1.6.11",

@@ -1,5 +1,5 @@
 
-from langchain_core.runnables import RunnablePassthrough
+
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.messages import HumanMessage, AIMessage
 from typing import Optional, List
@@ -19,7 +19,8 @@ class FinancialRAGPipeline:
     """
     logger = Logger(name="FinancialRAGPipeline", log_file="FinancialRAGPipeline.log", level="DEBUG")
     
-    def __init__(self,model_provider='openai',model_name='gpt-4o-mini',temperature=0.1):
+    def __init__(self,model_provider: Optional[str] =None,
+                    model_name: Optional[str]=None,temperature: float=0.1):
         
         self.retriever = RAGRetriever()
         self.llm = LLMFactory.get_llm(model_name=model_name, model_provider=model_provider, temperature=temperature)

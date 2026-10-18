@@ -1,7 +1,6 @@
-from anyio import gettempdir
+
 from typing import List, Tuple
-from aiohttp.web import static
-from os import stat
+import os
 import hashlib
 from pathlib import Path
 from langchain_chroma import Chroma
@@ -19,7 +18,8 @@ class VectorStore(ComponentInterface):
 
     def __init__(self, vector_store_path: Path = None, embeddings=None, collection_name: str = "stock_embeddings") -> None:
         self.vector_store_path = vector_store_path
-        self.embeddings = embeddings
+        embedding_model = os.environ.get("EMBEDDING_MODEL_NAME", "openai:text-embedding-3-small")
+        self.embeddings = embeddings or init_embeddings(model=embedding_model)
         self.collection_name = collection_name
         self._vector_store = Chroma(
             persist_directory=self.vector_store_path, 
@@ -59,14 +59,22 @@ class VectorStore(ComponentInterface):
         self.logger.info(f"Adding {len(unique_docs)} unique documents to collection '{self.collection_name}'")
         return (unique_ids, unique_docs)
 
-    def add_documents_to_vector_store(self, docs: list[Document]) -> Chroma:
+    def add_documents_to_vector_store(self, docs: list[Document], batch_size: int = 500) -> Chroma:
         if not docs:
             self.logger.warning("No documents provided to add to vector store.") 
             return self._vector_store
 
         unique_ids, unique_docs = self._deduplicate_documents(docs)
-        self._vector_store.add_documents(unique_docs, ids= unique_ids)
-        self.logger.info("Documents added successfully")
+        total_docs = len(unique_docs)
+        total_batches = (total_docs + batch_size - 1) // batch_size
+
+        for idx, i in enumerate(range(0, total_docs, batch_size), start=1):
+            batch_docs = unique_docs[i:i + batch_size]
+            batch_ids = unique_ids[i:i + batch_size]
+            self.logger.info(f"Adding batch {idx}/{total_batches} ({len(batch_docs)} documents) to ChromaDB...")
+            self._vector_store.add_documents(batch_docs, ids=batch_ids)
+
+        self.logger.info("All documents added successfully")
         return self._vector_store
     
     @staticmethod

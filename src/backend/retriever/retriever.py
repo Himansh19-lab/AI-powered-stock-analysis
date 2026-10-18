@@ -12,29 +12,31 @@ from dotenv import load_dotenv
 from backend.utils.CommonInterface import ComponentInterface
 from backend.utils.logger import Logger
 
+from backend.utils.config import config
+
 class RAGRetriever(ComponentInterface):
     """ 
     A retriever class for RAG-based retrieval.
     """
 
-    logger = Logger(name="RAGRetriever", log_file="retriever.log",level="INFO")
+    logger = Logger(name="RAGRetriever", log_file="retriever.log", level="INFO")
 
-    def __init__(self, vector_store_path: Optional[None] = None, 
-                embeddings=None, collection_name ="stock_embeddings",
-                top_k: int =4, search_type: str ="similarity") -> None:
+    def __init__(self, vector_store_path: Optional[Path] = None, 
+                embeddings=None, collection_name: Optional[str] = None,
+                top_k: Optional[int] = None, search_type: Optional[str] = None) -> None:
         
-        self.vector_store_path  = vector_store_path or Path(__file__).resolve().parents[3] / "storage/chroma"
-        self.embeddings = embeddings or init_embeddings(model="openai:text-embedding-3-small")
-        self.top_k = top_k
-        self.search_type = search_type
+        self.vector_store_path = vector_store_path or Path(__file__).resolve().parents[3] / "storage/chroma"
+        embedding_model = config.embeddings.model_name
+        self.embeddings = embeddings or init_embeddings(model=embedding_model)
+        self.top_k = top_k or config.retriever.top_k
+        self.search_type = search_type or config.retriever.search_type
+        self.collection_name = collection_name or config.storage.collection_name
         
         self.vector_store = Chroma(
             persist_directory=self.vector_store_path,
             embedding_function=self.embeddings,
-            collection_name=collection_name
-            
-
-            )
+            collection_name=self.collection_name
+        )
         self.retriever = self.vector_store.as_retriever(search_type=self.search_type, search_kwargs={"k": self.top_k})
         self.logger.info("RAG Retreiver Initilaized ..")
     

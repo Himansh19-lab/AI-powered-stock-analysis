@@ -8,6 +8,10 @@ langchain-community
 langchain-core
 langchain-text-splitters
 
+#bedrock
+langchain-aws
+boto3
+
 pypdf
 dotenv
 
