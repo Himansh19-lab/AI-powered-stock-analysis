@@ -29,7 +29,22 @@ services:
       start_period: 10s
 
   # ---------------------------------------------------------------------------
-  # 2. Streamlit Interactive Web Frontend
+  # 2. React Enterprise Dashboard (Port 3000 / 80)
+  # ---------------------------------------------------------------------------
+  react-frontend:
+    build:
+      context: .
+      dockerfile: frontend-react/Dockerfile
+    container_name: stock_analysis_react
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+
+  # ---------------------------------------------------------------------------
+  # 3. Streamlit Legacy Web Frontend (Port 8501)
   # ---------------------------------------------------------------------------
   frontend:
     build:
