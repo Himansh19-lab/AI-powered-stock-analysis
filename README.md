@@ -2,23 +2,28 @@
 
 [![Python Version](https://img.shields.io/badge/python-3.12%2B-blue.svg)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115%2B-009688.svg?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
+[![React](https://img.shields.io/badge/React-18.3%2B-61DAFB.svg?logo=react&logoColor=black)](https://react.dev/)
 [![Streamlit](https://img.shields.io/badge/Streamlit-1.40%2B-FF4B4B.svg?logo=streamlit&logoColor=white)](https://streamlit.io)
 [![LangChain](https://img.shields.io/badge/LangChain-v0.3%2B-1C3C3C.svg?logo=langchain&logoColor=white)](https://www.langchain.com/)
-[![ChromaDB](https://img.shields.io/badge/ChromaDB-Vector_Store-orange.svg)](https://www.trychroma.com/)
+[![AWS Bedrock](https://img.shields.io/badge/AWS_Bedrock-Titan_Embeddings-FF9900.svg?logo=amazon-aws&logoColor=white)](https://aws.amazon.com/bedrock/)
+[![Docker](https://img.shields.io/badge/Docker-Enabled-2496ED.svg?logo=docker&logoColor=white)](https://www.docker.com/)
+[![CI/CD: GitHub Actions](https://img.shields.io/badge/CI%2FCD-GitHub_Actions-2088FF.svg?logo=github-actions&logoColor=white)](https://github.com/Himansh19-lab/AI-powered-stock-analysis/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-An enterprise-grade **Retrieval-Augmented Generation (RAG)** system built to analyze corporate annual reports (SEC 10-K, 10-Q) with deep financial intelligence. The system automates structured financial report generation and provides an interactive conversational assistant with real-time streaming and source attribution.
+An enterprise-grade **Retrieval-Augmented Generation (RAG)** intelligence platform built to parse, index, and analyze corporate annual reports (SEC 10-K, 10-Q) with institutional financial rigor. The system automates structured equity research dossiers and provides an interactive conversational analyst with real-time token streaming and citation attribution.
 
 ---
 
 ## 🌟 Key Features
 
-- **📑 Automated Financial Analysis Report**: Generates structured, professional investment reports covering Consolidated Statements of Operations, revenue segments, operating risks, and valuation drivers.
+- **📊 Bloomberg-Style Enterprise React Dashboard**: Dark slate institutional UI built with React 18, Vite, Lucide icons, and responsive Nginx reverse proxy.
+- **📑 Institutional Financial Dossier Generation**: Synthesizes structured investment reports covering Consolidated Statements of Operations, revenue segments, operational risks, and valuation drivers.
 - **💬 Conversational RAG with Contextual Rephrasing**: Multi-turn dialogue with memory that reformulates follow-up queries based on conversational history.
-- **⚡ Real-Time Streaming Responses**: Low-latency token streaming using Server-Sent Events (`text/event-stream`) in FastAPI and `st.write_stream` in Streamlit.
-- **📥 Smart PDF Ingestion & Deduplication**: Upload corporate 10-K PDFs with deterministic SHA-256 chunk hashing to eliminate redundant embeddings.
-- **🎯 Document-Filtered Retrieval**: Switch between cross-company search or ground retrieval strictly to a selected filing (e.g., `NASDAQ_AAPL_2025.pdf`).
-- **🧩 Decoupled Modular Architecture**: Clean separation between ingestion, retrieval, prompt pipelines, FastAPI REST backend, and Streamlit frontend.
+- **⚡ Real-Time Streaming Responses**: Low-latency token streaming using Server-Sent Events (`text/event-stream`) in FastAPI.
+- **📥 Smart PDF Ingestion & Batch Indexing**: Upload corporate 10-K PDFs with deterministic SHA-256 chunk hashing and batched ChromaDB insertions (500 chunks/batch) to avoid SQLite batch limits.
+- **🎯 Document-Filtered Retrieval**: Switch between global portfolio search or isolate retrieval strictly to a selected filing (e.g., `NASDAQ_AAPL_2025.pdf`).
+- **☁️ Multi-Cloud & Hybrid Inference**: Support for **AWS Bedrock** (`amazon.titan-embed-text-v2:0`, `amazon.nova-pro-v1:0`, `meta.llama3-1-70b-instruct-v1:0`) and fallback to **OpenAI** (`gpt-4o-mini`).
+- **🚀 Automated CI/CD & EC2 Deployment**: Fully automated testing with `pytest`, GHCR Docker image publishing, and SSH-based Continuous Deployment to AWS EC2 (`c7i-flex.large`).
 
 ---
 
@@ -26,25 +31,27 @@ An enterprise-grade **Retrieval-Augmented Generation (RAG)** system built to ana
 
 ```mermaid
 graph TD
-    subgraph Data Ingestion
-        PDF[Annual Report PDF] --> DL[DocumentLoader]
-        DL --> CD[ChunkDocument]
-        CD --> DEDUP[SHA-256 Deduplication]
-        DEDUP --> VS[(ChromaDB Vector Store)]
+    subgraph Data Ingestion Pipeline
+        PDF[Annual Report PDF 10-K] --> DL[PyPDFLoader]
+        DL --> CD[RecursiveCharacterTextSplitter]
+        CD --> DEDUP[SHA-256 Chunk Hashing]
+        DEDUP --> EMB[AWS Titan / OpenAI Embeddings]
+        EMB --> VS[(ChromaDB Vector Store)]
     end
 
-    subgraph RAG Pipeline
-        Query[User Question] --> CR[Contextual Rephrase Chain]
-        CR --> RET[RAG Retriever]
+    subgraph RAG Orchestration
+        Query[Analyst Query] --> CR[Contextual Rephrase Chain]
+        CR --> RET[Chroma Filtered Retriever]
         VS -. Top-k Chunks .-> RET
-        RET --> PROMPT[Financial / Conversational Prompt]
-        PROMPT --> LLM[OpenAI / Gemini LLM]
-        LLM --> STREAM[Streaming Output Parser]
+        RET --> PROMPT[Institutional Financial Prompt]
+        PROMPT --> LLM[AWS Bedrock / OpenAI LLM]
+        LLM --> STREAM[Streaming Token Parser]
     end
 
-    subgraph Applications
-        STREAM --> API[FastAPI REST API /api/v1]
-        API --> UI[Streamlit Interactive Frontend]
+    subgraph Microservices & Deployment
+        STREAM --> API[FastAPI REST API :8000]
+        API --> UI_REACT[Enterprise React Dashboard :3000]
+        API --> UI_STREAMLIT[Streamlit Explorer :8501]
     end
 ```
 
@@ -54,153 +61,143 @@ graph TD
 
 ```text
 AI-powered-stock-analysis/
+├── config/
+│   └── config.yaml               # Centralized configuration (models, chunk sizes, paths)
 ├── data/                         # Uploaded company annual reports (.pdf)
-├── storage/                      # Persistent ChromaDB vector store
+├── frontend-react/               # Enterprise React 18 + Vite frontend
+│   ├── src/
+│   │   ├── App.jsx               # Bloomberg-style institutional dashboard
+│   │   └── index.css             # Dark slate design system & tokens
+│   ├── Dockerfile                # Multi-stage production Nginx build
+│   └── package.json
+├── storage/                      # Persistent ChromaDB vector database
 ├── logs/                         # Structured application logs
 ├── src/
 │   ├── backend/
 │   │   ├── api/
-│   │   │   ├── __init__.py
 │   │   │   ├── route.py          # FastAPI endpoints (/health, /upload, /report, /chat, /companies)
-│   │   │   └── schema.py         # Pydantic request & response schemas
+│   │   │   └── schema.py         # Pydantic v2 validation models
 │   │   ├── generation/
-│   │   │   ├── llm.py            # Multi-provider LLM Factory (OpenAI, Gemini)
-│   │   │   └── prompt.py         # Financial report & conversational prompt templates
+│   │   │   ├── llm.py            # AWS Bedrock Converse & OpenAI LLM Factory
+│   │   │   └── prompt.py         # Institutional financial prompt templates
 │   │   ├── indexing/
-│   │   │   ├── document_loader.py# PyPDFLoader with format validation
-│   │   │   ├── document_split.py # Recursive text chunker
-│   │   │   └── vector_store.py   # ChromaDB manager with SHA-256 deduplication
+│   │   │   ├── document_loader.py# PyPDFLoader with metadata extraction
+│   │   │   ├── document_split.py # Recursive text chunker (1000 chunk size, 200 overlap)
+│   │   │   └── vector_store.py   # ChromaDB manager with batching & deduplication
 │   │   ├── pipeline/
 │   │   │   └── rag_pipeline.py   # End-to-end Financial RAG pipeline orchestrator
 │   │   ├── retriever/
-│   │   │   └── retriever.py      # Filtered similarity retriever
+│   │   │   └── retriever.py      # Filtered similarity retriever with k=5
 │   │   └── utils/
-│   │       ├── CommonInterface.py# Component base interface
+│   │       ├── config.py         # Pydantic YAML config loader
 │   │       └── logger.py         # Standardized logging utility
 │   └── frontend/
-│       └── app.py                # Streamlit user interface
-├── .env.example                  # Environment variable template
-├── pyproject.toml                # Project metadata & dependencies
-├── requirement.txt               # Pinned package requirements
+│       └── app.py                # Streamlit secondary interface
+├── tests/                        # Automated Pytest suite (API, indexing, schemas)
+├── .github/workflows/
+│   ├── ci.yml                    # Automated unit tests on pull requests & pushes
+│   └── cd.yml                    # Docker build, GHCR push, & automated EC2 deploy
+├── Dockerfile                    # Backend & Streamlit multi-purpose container
+├── docker-compose.yml            # Multi-container orchestration (FastAPI + React + Streamlit)
+├── pyproject.toml                # Project dependencies (managed via uv)
 └── README.md
 ```
 
 ---
 
-## 🚀 Getting Started
+## 🚀 Quickstart: Docker Compose (Recommended)
 
-### Prerequisites
-- Python `3.12` or higher
-- [uv](https://docs.astral.sh/uv/) (recommended ultra-fast package manager) or `pip`
+The easiest way to run the full stack (FastAPI Backend + Enterprise React UI + Streamlit) is with Docker Compose:
 
-### 1. Clone the Repository
+### 1. Clone & Configure
 ```bash
 git clone https://github.com/Himansh19-lab/AI-powered-stock-analysis.git
 cd AI-powered-stock-analysis
-```
-
-### 2. Environment Configuration
-Copy the example environment file and add your API keys:
-```bash
 cp .env.example .env
 ```
-Edit `.env`:
+Fill in your credentials inside `.env`:
 ```env
-OPENAI_API_KEY="your-openai-api-key"
-GOOGLE_API_KEY="your-google-api-key"
-HF_TOKEN="your-huggingface-token"
+OPENAI_API_KEY=your_openai_api_key
+AWS_ACCESS_KEY_ID=your_aws_access_key
+AWS_SECRET_ACCESS_KEY=your_aws_secret_key
+AWS_DEFAULT_REGION=us-east-1
 ```
 
-### 3. Install Dependencies
-Using `uv`:
+### 2. Launch Containers
+```bash
+docker compose up -d --build
+```
+
+### 3. Access the Services
+| Service | URL | Description |
+| :--- | :--- | :--- |
+| **Enterprise React UI** | `http://localhost:3000` | Bloomberg-style financial dashboard |
+| **FastAPI Swagger Docs**| `http://localhost:8000/docs` | Interactive REST API documentation |
+| **Streamlit Explorer**  | `http://localhost:8501` | Alternative lightweight UI |
+
+### 4. Stop Containers
+```bash
+docker compose down
+```
+
+---
+
+## 💻 Local Development Setup
+
+### Prerequisites
+- Python `3.12+`
+- Node.js `20+` & npm
+- [uv](https://docs.astral.sh/uv/) (Astral package manager)
+
+### 1. Install Backend Dependencies
 ```bash
 uv sync
 ```
-*Or using traditional `pip`:*
-```bash
-python -m venv .venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-pip install -r requirement.txt
-```
 
----
-
-## 🖥️ Running the Application
-
-### 1. Start the FastAPI Backend
+### 2. Start Backend API
 ```bash
 uv run uvicorn --app-dir src backend.api.route:app --reload --port 8000
 ```
-- API will be live at: `http://localhost:8000`
-- Interactive Swagger API docs: `http://localhost:8000/docs`
 
-### 2. Start the Streamlit Frontend
-In a separate terminal window:
+### 3. Start React Frontend
 ```bash
-uv run streamlit run src/frontend/app.py
+cd frontend-react
+npm install
+npm run dev
 ```
-- Web UI will automatically open at: `http://localhost:8501`
+
+### 4. Run Test Suite
+```bash
+uv run pytest -v
+```
 
 ---
 
-## 📡 API Reference
+## 📡 API Endpoints
 
 | Method | Endpoint | Description |
 | :--- | :--- | :--- |
 | **GET** | `/api/v1/health` | Service health check |
 | **POST** | `/api/v1/upload` | Upload & index corporate annual report PDF |
-| **GET** | `/api/v1/companies` | List all available indexed report PDFs |
-| **POST** | `/api/v1/report` | Generate comprehensive financial analysis report |
-| **POST** | `/api/v1/chat` | Conversational RAG assistant (supports streaming) |
-
-### Sample API Requests
-
-#### Upload PDF Filing
-```bash
-curl -X POST "http://localhost:8000/api/v1/upload" \
-  -F "file=@data/NASDAQ_AAPL_2025.pdf"
-```
-
-#### Generate Financial Report
-```bash
-curl -X POST "http://localhost:8000/api/v1/report" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "company_name": "Apple",
-    "source_pdf": "NASDAQ_AAPL_2025.pdf"
-  }'
-```
-
-#### Interactive Chat Query (Streaming)
-```bash
-curl -N -X POST "http://localhost:8000/api/v1/chat" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "query": "What was the total net sales of Apple in fiscal year 2025?",
-    "company_name": "Apple",
-    "source_pdf": "NASDAQ_AAPL_2025.pdf",
-    "chat_history": [],
-    "stream": true
-  }'
-```
+| **GET** | `/api/v1/companies` | List all indexed SEC filing PDFs |
+| **POST** | `/api/v1/report` | Generate structured institutional financial report |
+| **POST** | `/api/v1/chat` | Conversational RAG assistant (supports token streaming) |
 
 ---
 
-## 🛠️ Technology Stack
+## ☁️ Production Deployment (AWS EC2)
 
-- **Framework**: [LangChain](https://www.langchain.com/) (Runnables, LCEL, Core)
-- **Vector Database**: [ChromaDB](https://www.trychroma.com/)
-- **Embeddings**: OpenAI `text-embedding-3-small`
-- **Inference LLMs**: OpenAI `gpt-4o-mini` / Google `gemini-1.5-flash`
-- **Backend**: [FastAPI](https://fastapi.tiangolo.com/), Uvicorn, Pydantic v2
-- **Frontend**: [Streamlit](https://streamlit.io/)
-- **Package Manager**: [uv](https://github.com/astral-sh/uv)
+This repository includes a continuous deployment workflow via GitHub Actions:
+
+1. **EC2 Provisioning**: Ubuntu Server 24.04 LTS on `c7i-flex.large` (2 vCPUs, 4 GB RAM, x86_64).
+2. **Security Groups**: Open inbound ports `22` (SSH), `3000` (React), `8000` (FastAPI), and `8501` (Streamlit).
+3. **Automated CI/CD**: Pushing to the `main` branch automatically runs tests, builds container images, and deploys directly to EC2 via GitHub Actions secrets (`EC2_HOST`, `EC2_USER`, `EC2_SSH_KEY`).
 
 ---
 
 ## 📄 License
 
-This project is licensed under the [MIT License](LICENSE) - see the LICENSE file for details.
+This project is licensed under the [MIT License](LICENSE).
 
 ---
 
