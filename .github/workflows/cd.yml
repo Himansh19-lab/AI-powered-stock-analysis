@@ -34,6 +34,11 @@ jobs:
 
       - name: Run Pytest test suite
         run: uv run pytest -v
+        env:
+          AWS_ACCESS_KEY_ID: mock_aws_access_key
+          AWS_SECRET_ACCESS_KEY: mock_aws_secret_key
+          AWS_DEFAULT_REGION: us-east-1
+          OPENAI_API_KEY: mock_openai_api_key
 
       # 3. Set up Docker Buildx (for advanced caching and fast builds)
       - name: Set up Docker Buildx

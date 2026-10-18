@@ -27,7 +27,10 @@ class RAGRetriever(ComponentInterface):
         
         self.vector_store_path = vector_store_path or config.paths.chroma_db
         embedding_model = config.embeddings.model_name
-        self.embeddings = embeddings or init_embeddings(model=embedding_model)
+        embed_kwargs = {}
+        if embedding_model.startswith("bedrock:"):
+            embed_kwargs["region_name"] = os.environ.get("AWS_DEFAULT_REGION", "us-east-1")
+        self.embeddings = embeddings or init_embeddings(model=embedding_model, **embed_kwargs)
         self.top_k = top_k or config.retriever.top_k
         self.search_type = search_type or config.retriever.search_type
         self.collection_name = collection_name or config.storage.collection_name

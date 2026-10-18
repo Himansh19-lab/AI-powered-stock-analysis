@@ -25,7 +25,10 @@ class VectorStore(ComponentInterface):
         self.vector_store_path.mkdir(parents=True, exist_ok=True)
 
         embedding_model = config.embeddings.model_name
-        self.embeddings = embeddings or init_embeddings(model=embedding_model)
+        embed_kwargs = {}
+        if embedding_model.startswith("bedrock:"):
+            embed_kwargs["region_name"] = os.environ.get("AWS_DEFAULT_REGION", "us-east-1")
+        self.embeddings = embeddings or init_embeddings(model=embedding_model, **embed_kwargs)
 
         self.collection_name = collection_name or config.storage.collection_name
         self._vector_store = Chroma(
