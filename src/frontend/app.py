@@ -168,7 +168,7 @@ with st.sidebar:
 
 
 # ---------------- MAIN CONTENT ----------------
-st.markdown('<div class="main-header">📈 AI-Powered Financial Stock Analysis</div>', unsafe_allow_html=True)
+st.markdown('<div class="main-header">📈 AI-Powered Financial Stock Analysis <span style="font-size: 0.9rem; background: #2563EB; color: white; padding: 2px 8px; border-radius: 6px; vertical-align: middle;">v1.0 Live</span></div>', unsafe_allow_html=True)
 st.markdown(
     '<div class="sub-header">Deep RAG-powered financial intelligence from company annual reports (10-K/10-Q)</div>',
     unsafe_allow_html=True
