@@ -2,16 +2,22 @@
 # AI-Powered Stock Analysis Configuration
 # ==============================================================================
 
+# Paths
+paths:
+  data_dir: "data"
+  chroma_db: "storage/chroma"
+  
+
 # LLM Generation Configuration
 llm:
-  provider: "openai"                            # Options: "openai", "bedrock", "google_genai"
-  model_name: "gpt-4o-mini"                     # Bedrock: "amazon.nova-pro-v1:0", "meta.llama3-1-70b-instruct-v1:0"
+  provider: "bedrock"                            # Options: "openai", "bedrock", "google_genai"
+  model_name: "amazon.nova-pro-v1:0"                     # Bedrock: "amazon.nova-pro-v1:0", "meta.llama3-1-70b-instruct-v1:0"
   temperature: 0.1                              # Lower = more factual, Higher = more creative
   max_tokens: 2048                              # Maximum completion length
 
 # Embeddings Configuration
 embeddings:
-  model_name: "openai:text-embedding-3-small"   # e.g., "openai:text-embedding-3-small", "amazon.titan-embed-text-v2:0"
+  model_name: "bedrock:amazon.titan-embed-text-v2:0"   # Bedrock: "bedrock:amazon.titan-embed-text-v2:0", OpenAI: "openai:text-embedding-3-small"
 
 # Text Chunking Settings
 chunking:
@@ -20,7 +26,7 @@ chunking:
 
 # Vector Retrieval Settings
 retriever:
-  top_k: 4                                      # Number of relevant chunks retrieved per query
+  top_k: 5                                      # Number of relevant chunks retrieved per query
   search_type: "similarity"                    # Search method: "similarity", "mmr"
 
 # Storage Settings

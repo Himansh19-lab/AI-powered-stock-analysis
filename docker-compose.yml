@@ -1,0 +1,51 @@
+version: "3.8"
+
+services:
+  # ---------------------------------------------------------------------------
+  # 1. FastAPI REST API Backend
+  # ---------------------------------------------------------------------------
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: stock_analysis_backend
+    restart: unless-stopped
+    command: >
+      uv run uvicorn --app-dir src backend.api.route:app
+      --host 0.0.0.0 --port 8000
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+      - ./storage:/app/storage
+      - ./logs:/app/logs
+    env_file:
+      - .env
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  # ---------------------------------------------------------------------------
+  # 2. Streamlit Interactive Web Frontend
+  # ---------------------------------------------------------------------------
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: stock_analysis_frontend
+    restart: unless-stopped
+    command: >
+      uv run streamlit run src/frontend/app.py
+      --server.port 8501 --server.address 0.0.0.0
+    ports:
+      - "8501:8501"
+    environment:
+      - API_BASE_URL=http://backend:8000/api/v1
+    volumes:
+      - ./logs:/app/logs
+    depends_on:
+      backend:
+        condition: service_healthy

@@ -1,4 +1,5 @@
 
+from backend.utils.config import config
 from typing_extensions import Union
 from langchain_community.document_loaders import PyPDFLoader, TextLoader
 from langchain_core.documents import Document
@@ -78,13 +79,13 @@ class DocumentLoader(ComponentInterface):
         return all_documents
 
 
-    def invoke(self, input_path: str | Path ) -> List[Document]:
+    def invoke(self, input_path: Path = None ) -> List[Document]:
         """
         Unified entry point routes to file or directory loader automatically.
         Returns a list of documents, sorted by filename
         """
 
-        input_path = Path(input_path)
+        input_path = input_path or config.paths.data_dir
         if input_path.is_file():
             return self.load_from_file(input_path)
         elif input_path.is_dir():

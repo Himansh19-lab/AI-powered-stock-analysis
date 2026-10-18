@@ -1,15 +1,26 @@
 from pathlib import Path
 import os
 import yaml
-from pydantic import BaseModel, Field
 from typing import Optional
 from dotenv import load_dotenv
+from pydantic import BaseModel, Field, field_validator
 
 load_dotenv()
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_CONFIG_PATH = PROJECT_ROOT / "config" / "config.yaml"
 
+class Paths(BaseModel):
+    data_dir: Path = PROJECT_ROOT / "data"
+    chroma_db: Path = PROJECT_ROOT / "storage" / "chroma"
+
+    @field_validator("data_dir", "chroma_db", mode="before")
+    @classmethod
+    def resolve_path(cls, v):
+        if v is None:
+            return v
+        p = Path(v)
+        return (PROJECT_ROOT / p).resolve() if not p.is_absolute() else p.resolve()
 
 class LLMConfig(BaseModel):
     provider: str = "openai"
@@ -37,6 +48,7 @@ class StorageConfig(BaseModel):
 
 
 class AppConfig(BaseModel):
+    paths: Paths = Field(default_factory=Paths)
     llm: LLMConfig = Field(default_factory=LLMConfig)
     embeddings: EmbeddingConfig = Field(default_factory=EmbeddingConfig)
     chunking: ChunkingConfig = Field(default_factory=ChunkingConfig)
@@ -68,6 +80,10 @@ def load_config(config_path: Optional[Path] = None) -> AppConfig:
     env_embed = os.environ.get("EMBEDDING_MODEL_NAME")
     if env_embed:
         cfg.embeddings.model_name = env_embed
+
+    # Ensure amazon models are properly prefixed for langchain init_embeddings
+    if cfg.embeddings.model_name.startswith("amazon.") and not cfg.embeddings.model_name.startswith("bedrock:"):
+        cfg.embeddings.model_name = f"bedrock:{cfg.embeddings.model_name}"
 
     return cfg
 

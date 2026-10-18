@@ -25,7 +25,7 @@ class RAGRetriever(ComponentInterface):
                 embeddings=None, collection_name: Optional[str] = None,
                 top_k: Optional[int] = None, search_type: Optional[str] = None) -> None:
         
-        self.vector_store_path = vector_store_path or Path(__file__).resolve().parents[3] / "storage/chroma"
+        self.vector_store_path = vector_store_path or config.paths.chroma_db
         embedding_model = config.embeddings.model_name
         self.embeddings = embeddings or init_embeddings(model=embedding_model)
         self.top_k = top_k or config.retriever.top_k

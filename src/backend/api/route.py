@@ -28,10 +28,12 @@ from backend.api.schema import (
 )
 
 
+from backend.utils.config import config
+
 logger = Logger(name="APIRoute", log_file="api_route.log", level="DEBUG")
 
-DATA_DIR = Path(__file__).resolve().parents[3] / 'data'
-CHROMA_DB = Path(__file__).resolve().parents[3] / 'storage'/ 'chroma'
+DATA_DIR = config.paths.data_dir
+CHROMA_DB = config.paths.chroma_db
 pipeline = FinancialRAGPipeline()
 
 app = FastAPI(title="AI-powered Stock Analysis", version="1.0.0")

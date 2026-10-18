@@ -1,5 +1,5 @@
 
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 import os
 import hashlib
 from pathlib import Path
@@ -13,14 +13,21 @@ from backend.indexing.document_split import ChunkDocument
 from backend.utils.logger import Logger
 
 
+from backend.utils.config import config
+
 class VectorStore(ComponentInterface):
     logger = Logger(name="VectorStore", log_file="vector_store.log", level="INFO")
 
-    def __init__(self, vector_store_path: Path = None, embeddings=None, collection_name: str = "stock_embeddings") -> None:
-        self.vector_store_path = vector_store_path
-        embedding_model = os.environ.get("EMBEDDING_MODEL_NAME", "openai:text-embedding-3-small")
+    def __init__(self, vector_store_path: Path = None, embeddings=None, collection_name: Optional[str] = None) -> None:
+        
+
+        self.vector_store_path = vector_store_path or config.paths.chroma_db
+        self.vector_store_path.mkdir(parents=True, exist_ok=True)
+
+        embedding_model = config.embeddings.model_name
         self.embeddings = embeddings or init_embeddings(model=embedding_model)
-        self.collection_name = collection_name
+
+        self.collection_name = collection_name or config.storage.collection_name
         self._vector_store = Chroma(
             persist_directory=self.vector_store_path, 
             embedding_function=self.embeddings, 
@@ -92,11 +99,8 @@ class VectorStore(ComponentInterface):
 if __name__ == "__main__":
     load_dotenv()
     loader = DocumentLoader()
-    documents = loader.invoke(Path("/Users/himanshu/Documents/IIIT_Bangalore/Git-repo/AI-powered-stock-analysis/data"))
+    documents = loader.invoke()
     chunker = ChunkDocument()
     chunks = chunker.invoke(documents)
-    embeddings = init_embeddings("openai:text-embedding-3-small")
-    database_path = Path(__file__).resolve().parents[3] / "storage/chroma"
-    database_path.mkdir(parents=True, exist_ok=True)
-    vector_store = VectorStore(vector_store_path=database_path, embeddings=embeddings)
+    vector_store = VectorStore()
     vector_store.invoke(chunks)
